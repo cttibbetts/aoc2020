@@ -14,7 +14,7 @@ def init(c, day):
 @task
 def readme(c):
   c.run("""
-    printf "# [Advent of Code 2019](https://adventofcode.com/2019)\n" > README.md
+    printf "# [Advent of Code 2020](https://adventofcode.com/2020)\n\n" > README.md
     cd leaderboard; python3 main.py --user me >> ../README.md
   """)
 
