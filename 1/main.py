@@ -37,7 +37,6 @@ def solve2(input):
 
 if __name__ == "__main__":
     # Tests
-    assert True
     assert solve1([1721, 979, 366, 299, 675, 1456]) == 514579
     assert solve2([1721, 979, 366, 299, 675, 1456]) == 241861950
 
