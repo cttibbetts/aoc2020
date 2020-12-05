@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import re
 
+import passports
+
 with open("input.txt") as file:
     input = [line.strip() for line in file.readlines()]
 
@@ -58,67 +60,18 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
 )
 
 
-def valid_hgt(x):
-    unit = x[-2:]
-    if unit == "cm" and 150 <= int(x[:-2]) <= 193:
-        return True
-    if unit == "in" and 59 <= int(x[:-2]) <= 76:
-        return True
-    return False
-
-
-eye_cols = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-
-field_valid = {
-    "byr": lambda x: len(x) == 4 and 1920 <= int(x) <= 2002,
-    "iyr": lambda x: len(x) == 4 and 2010 <= int(x) <= 2020,
-    "eyr": lambda x: len(x) == 4 and 2020 <= int(x) <= 2030,
-    "hgt": valid_hgt,
-    "hcl": lambda x: bool(re.match(r"^#[0-9a-f]{6}$", x)),
-    "ecl": lambda x: x in eye_cols,
-    "pid": lambda x: bool(re.match(r"^[0-9]{9}$", x)),
-}
-
-
-def get_passports(input):
-    pp = {}
-    for line in input:
-        if line == "":
-            yield pp
-            pp = {}
-            continue
-
-        words = line.split(" ")
-        for word in words:
-            kv = word.split(":")
-            pp[kv[0]] = kv[1]
-    yield pp
-
-
-def valid_passport(passport, validate=False):
-    for f in field_valid.keys():
-        if f not in passport:
-            return False
-        if validate:
-            func = field_valid.get(f)
-            val = passport.get(f)
-            if not func(val):
-                return False
-    return True
-
-
 def solve1(input):
     count = 0
-    for pp in get_passports(input):
-        if valid_passport(pp):
+    for pp in passports.read_passports(input):
+        if passports.validate_passport(pp, validate=False):
             count += 1
     return count
 
 
 def solve2(input):
     count = 0
-    for pp in get_passports(input):
-        if valid_passport(pp, validate=True):
+    for pp in passports.read_passports(input):
+        if passports.validate_passport(pp):
             count += 1
     return count
 
@@ -128,20 +81,6 @@ if __name__ == "__main__":
     assert solve1(SAMPLE) == 2
     assert solve2(INVALIDS) == 0
     assert solve2(VALIDS) == 4
-
-    assert field_valid["byr"]("2002")
-    assert not field_valid["byr"]("2003")
-    assert field_valid["hgt"]("60in")
-    assert field_valid["hgt"]("190cm")
-    assert not field_valid["hgt"]("190in")
-    assert not field_valid["hgt"]("190")
-    assert field_valid["hcl"]("#123abc")
-    assert not field_valid["hcl"]("#123abz")
-    assert not field_valid["hcl"]("123abc")
-    assert field_valid["ecl"]("brn")
-    assert not field_valid["ecl"]("wat")
-    assert field_valid["pid"]("000000001")
-    assert not field_valid["pid"]("0123456789")
 
     # Part 1
     part1 = solve1(input)
