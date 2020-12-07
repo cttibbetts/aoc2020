@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 
 with open("input.txt") as file:
-    input = [line.strip() for line in file.readlines()]
-input.append("")
+    input = file.read()
+
+
+def double_split(input, parse_func=lambda x: x):
+    groups = input.split("\n\n")
+    return [parse_func(x) for x in groups]
+
 
 SAMPLE = """
 abc
@@ -20,42 +25,33 @@ a
 a
 
 b
-""".split(
-    "\n"
-)
+""".strip()
+
+
+def parse_people(group):
+    return [set(person) for person in group.split("\n")]
 
 
 def solve1(input):
-    answers = {}
+
     count = 0
-    for line in input:
-        for c in line:
-            answers[c] = True
-
-        if not line:
-            count += len(answers.keys())
-            answers = {}
-
+    for group in double_split(input, parse_people):
+        qs = set()
+        for person in group:
+            qs = qs.union(person)
+        count += len(qs)
     return count
 
 
 def solve2(input):
-    answers = {}
     count = 0
-    people = 0
-    for line in input:
-        if not line:
-            for q, a in answers.items():
-                if a == people:
-                    count += 1
-            answers = {}
-            people = 0
-            continue
-
-        people += 1
-        for c in line:
-            answers[c] = answers.get(c, 0) + 1
-
+    for group in double_split(input, parse_people):
+        qs = None
+        for person in group:
+            if qs is None:
+                qs = person
+            qs = qs.intersection(person)
+        count += len(qs)
     return count
 
 
