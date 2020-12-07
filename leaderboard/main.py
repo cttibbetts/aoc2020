@@ -1,4 +1,3 @@
-import sys
 import json
 import math
 from argparse import ArgumentParser
@@ -6,6 +5,7 @@ from datetime import timedelta, datetime
 from tabulate import tabulate
 
 DEBUG = False
+YEAR = 2020
 
 teams = {
     "nma": [
@@ -61,18 +61,20 @@ teams = {
 }
 
 whitelist = None
-# whitelist = teams['nma']
-# whitelist = teams['boston']
 
 
 def to_relative_seconds(day_number, timestamp):
-    day_number -= 1  # offset by one
-    dec_1 = 1606798800
-    day_delta = 86400
-    return timestamp - (dec_1 + day_number * day_delta)
+    """
+    Convert a timestamp on a given day to solve time in seconds
+    """
+    dec_1 = datetime(YEAR, 12, 1)
+    return timestamp - (dec_1 + timedelta(days=day_number - 1)).timestamp()
 
 
 def print_ts(delta):
+    """
+    Turn a duration in seconds to a timestamp string
+    """
     return str(timedelta(seconds=delta))
 
 
@@ -133,23 +135,58 @@ def get_user_markdown(user_list, name):
             break
 
 
+def get_day_results(user_list, day):
+    scores = []
+    for user in user_list.values():
+        day_score = (
+            user.get("completion_day_level", {})
+            .get(day, {})
+            .get("2", {})
+            .get("get_star_ts")
+        )
+        if day_score:
+            scores.append(
+                [
+                    user.get("name"),
+                    print_ts(to_relative_seconds(int(day), int(day_score))),
+                ]
+            )
+    print(
+        tabulate(
+            sorted(scores, key=lambda score: score[1]),
+            headers=["Name", "Time"],
+        )
+    )
+
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--team", type=str)
+    parser.add_argument("--day", type=str)
     parser.add_argument("--user", type=str)
     args = parser.parse_args()
 
+    # Read the leaderboard
     with open("leaderboard.json") as input:
         scoreboard = json.loads(input.readline())
     users = scoreboard["members"]
 
+    # Print all stats for a given user
     if args.user != "None":
         user = "Christopher Tibbetts" if args.user == "me" else args.user
         get_user_markdown(users, user)
         exit()
+
+    if args.day != "None":
+        print(f"Printing results for day {args.day}")
+        get_day_results(users, args.day)
+        exit()
+
+    # Only print the leaderboard for members of a given team
     if args.team != "None":
         whitelist = teams.get(args.team)
 
+    # Sort and process users in the leaderboard
     users = sorted(
         [process_user(u) for u in users.values()], key=sort_users, reverse=True
     )
