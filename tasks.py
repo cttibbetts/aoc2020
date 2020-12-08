@@ -1,11 +1,10 @@
 from invoke import task
-from datetime import datetime
 
 
 @task
 def run(c, day):
     with c.cd(day):
-        c.run(f"python3 main.py")
+        c.run("python3 main.py")
 
 
 @task
