@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from console import Console, LoopDetectedError, EndOfProgram
 
 with open("input.txt") as file:
     input = file.read()
@@ -86,6 +87,34 @@ def solve2(input):
             pass
 
 
+def solve1_class(input):
+    program = Console(input_split(input))
+    try:
+        program.run()
+    except LoopDetectedError as e:
+        return e.value
+
+
+def solve2_class(input):
+    program = input_split(input)
+
+    for ptr, instruction in enumerate(program):
+        p = Console(program)
+        if instruction.startswith("jmp"):
+            p.edit(ptr, op="nop")
+        elif instruction.startswith("nop"):
+            p.edit(ptr, op="jmp")
+        else:
+            continue
+
+        try:
+            p.run()
+        except LoopDetectedError:
+            continue
+        except EndOfProgram as e:
+            return e.value
+
+
 if __name__ == "__main__":
     # Tests
     assert solve1(SAMPLE) == 5
@@ -100,3 +129,8 @@ if __name__ == "__main__":
     part2 = solve2(input)
     assert part2 == 2060
     print(part2)
+
+    assert solve1_class(SAMPLE) == 5
+    assert solve1_class(input) == 1801
+    assert solve2_class(SAMPLE2) == 8
+    assert solve2_class(input) == 2060
