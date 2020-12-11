@@ -196,7 +196,7 @@ if __name__ == "__main__":
             [
                 i + 1,
                 user["name"],
-                user["stars"] * "*",
+                "* x" + str(user["stars"]),
                 print_ts(user["median_score"]),
                 *[print_ts(ts) for ts in get_middle_scores(user)],
             ]
