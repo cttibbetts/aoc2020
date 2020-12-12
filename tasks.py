@@ -4,7 +4,7 @@ from invoke import task
 @task
 def run(c, day):
     with c.cd(day):
-        c.run("python3 main.py")
+        c.run("python3 main.py", pty=True)
 
 
 @task

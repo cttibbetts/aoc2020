@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import time
 import copy
+from grid import Grid
 
 with open("input.txt") as file:
     input = file.read()
@@ -159,6 +159,60 @@ def solve2(input):
     return count
 
 
+def count_seats_grid(grid):
+    count = 0
+    for _, _, seat in grid.iterator():
+        if seat is OCCUPIED:
+            count += 1
+    return count
+
+
+def solve1_grid(input):
+    grid = Grid(input_split(input, parse))
+
+    change = True
+    while change:
+        change = False
+        new_grid = copy.deepcopy(grid)
+
+        for x, y, seat in grid.iterator():
+            # Seat is empty and no occupied seats
+            if seat is EMPTY and grid.get_adjacent(x, y).count(OCCUPIED) == 0:
+                new_grid.put(x, y, OCCUPIED)
+                change = True
+            # Seat is occupied and 4 or more are also occupied
+            if seat is OCCUPIED and grid.get_adjacent(x, y).count(OCCUPIED) >= 4:
+                new_grid.put(x, y, EMPTY)
+                change = True
+        grid = new_grid
+
+    count = count_seats_grid(grid)
+    return count
+
+
+def solve2_grid(input):
+    grid = Grid(input_split(input, parse))
+
+    change = True
+    while change:
+        change = False
+        new_grid = copy.deepcopy(grid)
+
+        for x, y, seat in grid.iterator():
+            # Rule 1
+            if seat is EMPTY and grid.look_adjacent(x, y).count(OCCUPIED) == 0:
+                new_grid.put(x, y, OCCUPIED)
+                change = True
+            # Rule 2
+            if seat is OCCUPIED and grid.look_adjacent(x, y).count(OCCUPIED) >= 5:
+                new_grid.put(x, y, EMPTY)
+                change = True
+        grid = new_grid
+
+    count = count_seats_grid(grid)
+    return count
+
+
 if __name__ == "__main__":
     # Tests
 
@@ -174,3 +228,8 @@ if __name__ == "__main__":
     part2 = solve2(input)
     assert part2 == 2176
     print(part2)
+
+    assert solve1_grid(SAMPLE) == 37
+    assert solve1_grid(input) == 2412
+    assert solve2_grid(SAMPLE) == 26
+    assert solve2_grid(input) == 2176
