@@ -31,7 +31,7 @@ def solve2(input):
 
 if __name__ == "__main__":
     # Tests
-    assert True
+    assert solve1(SAMPLE)
 
     # Part 1
     part1 = solve1(input)
